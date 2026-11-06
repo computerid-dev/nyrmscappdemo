@@ -1,0 +1,18 @@
+{
+  "appName": "NYR Musik",
+  "packageName": "com.nyr.musik",
+  "orientation": "auto",
+  "permissions": [
+    "notification",
+    "bluetooth",
+    "storage",
+    "camera",
+    "video",
+    "audio",
+    "location",
+    "vibrate",
+    "wakelock",
+    "wifi",
+    "nfc"
+  ]
+}
