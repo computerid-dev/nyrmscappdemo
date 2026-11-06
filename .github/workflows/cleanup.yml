@@ -1,0 +1,39 @@
+name: Bersihkan build lama
+
+on:
+  schedule:
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Hapus release dan branch build yang lebih dari 3 hari
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          cutoff=$(date -u -d '3 days ago' +%s)
+
+          gh api "repos/$REPO/releases?per_page=100" \
+            --jq '.[] | select(.tag_name | startswith("build-")) | "\(.tag_name) \(.created_at)"' |
+          while read -r tag created; do
+            if [ "$(date -u -d "$created" +%s)" -lt "$cutoff" ]; then
+              echo "hapus release $tag"
+              gh release delete "$tag" --repo "$REPO" --cleanup-tag --yes || true
+            fi
+          done
+
+          gh api "repos/$REPO/branches?per_page=100" \
+            --jq '.[].name | select(startswith("build-"))' |
+          while read -r br; do
+            date=$(gh api "repos/$REPO/branches/$br" --jq '.commit.commit.committer.date')
+            if [ "$(date -u -d "$date" +%s)" -lt "$cutoff" ]; then
+              echo "hapus branch $br"
+              gh api -X DELETE "repos/$REPO/git/refs/heads/$br" || true
+            fi
+          done
