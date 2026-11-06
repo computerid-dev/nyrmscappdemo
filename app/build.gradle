@@ -1,0 +1,43 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.webapp.wrapper'
+    compileSdk 34
+
+    defaultConfig {
+        // Baris ini DIGANTI otomatis oleh .github/scripts/prepare.py
+        applicationId "com.example.placeholder"
+        minSdk 21
+        targetSdk 34
+        // Naik otomatis tiap build supaya APK baru bisa update di atas yang lama
+        versionCode Integer.parseInt(System.getenv("GITHUB_RUN_NUMBER") ?: "1")
+        versionName "1.0"
+    }
+
+    // Keystore tetap -> tanda tangan APK selalu sama di semua build
+    signingConfigs {
+        debug {
+            storeFile rootProject.file('keystore/debug.keystore')
+            storePassword 'android'
+            keyAlias 'androiddebugkey'
+            keyPassword 'android'
+        }
+    }
+
+    buildTypes {
+        debug {
+            signingConfig signingConfigs.debug
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+dependencies {
+    implementation 'androidx.webkit:webkit:1.8.0'
+}
